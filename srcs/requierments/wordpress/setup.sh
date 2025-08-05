@@ -2,16 +2,13 @@
 
 set -e  # Arrêt en cas d'erreur
 
-echo "⌛ En attente que MariaDB soit prête..."
 until mysqladmin ping -h"$SQL_HOST" -u"$SQL_USER" -p"$SQL_PASSWORD" --silent; do
   sleep 1
 done
-echo "✅ MariaDB est prête."
 
 cd /var/www/wordpress
 
 if [ ! -f wp-config.php ]; then
-  echo "🛠 Création de wp-config.php..."
   wp config create \
     --dbname="$SQL_DATABASE" \
     --dbuser="$SQL_USER" \
@@ -19,7 +16,10 @@ if [ ! -f wp-config.php ]; then
     --dbhost="$SQL_HOST" \
     --path=/var/www/wordpress --allow-root
 
-  echo "🛠 Installation de WordPress..."
+  wp config set WP_REDIS_HOST redis --type=constant --allow-root
+  wp config set WP_REDIS_PORT 6379 --type=constant --allow-root
+
+
   wp core install \
     --url="$DOMAIN_NAME" \
     --title="$WEBSITE_TITLE" \
@@ -29,14 +29,16 @@ if [ ! -f wp-config.php ]; then
     --skip-email \
     --path=/var/www/wordpress --allow-root
 
-  echo "👤 Création de l'utilisateur auteur..."
   wp user create "$WP_USER_LOGIN" "$WP_USER_EMAIL" \
     --role=author \
     --user_pass="$WP_USER_PASSWORD" \
     --path=/var/www/wordpress --allow-root
-else
-  echo "✅ WordPress déjà configuré."
+
+  
+  wp plugin install redis-cache --activate --allow-root
+  wp redis enable --allow-root
+
+
 fi
 
-echo "🚀 Lancement de PHP-FPM..."
 exec /usr/sbin/php-fpm7.4 -F
