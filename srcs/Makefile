@@ -1,7 +1,7 @@
 include .env
 
 COMPOSE_FILE = docker-compose.yml
-COMPOSE = docker compose -f $(COMPOSE_FILE)
+COMPOSE = docker-compose -f $(COMPOSE_FILE)
 
 # Volumes
 DB_VOLUME = /home/$(USER)/data/mariadb
@@ -80,11 +80,14 @@ clean: down delete_volume
 	@echo "$(GREEN)✅ Clean complete.$(RESET)"
 
 fclean: clean
-	@echo "$(RED)💣 Full clean — removing volumes & networks...$(RESET)"
+	@echo "$(RED)💣 Full clean — removing Docker volumes, networks, images...$(RESET)"
+	@docker container prune -f
 	@docker volume prune -f
 	@docker network prune -f
 	@docker image prune -a -f
-	@echo "$(GREEN)🧨 Docker system reset complete.$(RESET)"
+	@echo "$(YELLOW)🗑️  Removing ~/data directory...$(RESET)"
+	@echo "$(GREEN)🧨 Docker system reset complete + data directory removed.$(RESET)"
+
 
 re: clean build
 	@echo "$(GREEN)🔄 Rebuild finished.$(RESET)"

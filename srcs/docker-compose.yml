@@ -15,6 +15,7 @@ services:
      # - ./nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "443:443"
+      - "80:80"
     networks:
       - inception
     restart: unless-stopped
@@ -64,6 +65,62 @@ services:
     expose:
       - "6379"
 
+  ftp:
+    container_name: ftp
+    image: ftp:inception
+    env_file:
+      - .env
+    build:
+      context: ./requierments/bonus/ftp
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    ports:
+      - "21:21"
+      - "20:20"
+      - "21100-21110:21100-21110"
+
+  static:
+    container_name: static
+    image: static:inception
+    build: ./requierments/bonus/static
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    networks:
+      - inception
+
+
+  adminer:
+    container_name: adminer
+    image: adminer:inception
+    build: ./requierments/bonus/adminer
+    ports:
+      - "8082:443"
+    platform: linux/arm64
+    depends_on:
+      - mariadb
+    networks:
+      - inception
+    restart: always
+
+  portainer:
+    build:
+      context: ./requierments/bonus/portainer
+    image: portainer:inception
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+      - "9000:9000"
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - inception
+  
 
 networks:
   inception:
@@ -84,3 +141,9 @@ volumes:
       type: "none"
       o: "bind"
       device: "/home/afontan/data/mariadb"
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/tboulogn/data/portainer

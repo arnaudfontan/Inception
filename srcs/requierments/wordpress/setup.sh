@@ -8,7 +8,7 @@ done
 
 cd /var/www/wordpress
 
-if [ ! -f wp-config.php ]; then
+if [ ! -f /var/www/wordpress/wp-config.php ]; then
   wp config create \
     --dbname="$SQL_DATABASE" \
     --dbuser="$SQL_USER" \
@@ -16,8 +16,6 @@ if [ ! -f wp-config.php ]; then
     --dbhost="$SQL_HOST" \
     --path=/var/www/wordpress --allow-root
 
-  wp config set WP_REDIS_HOST redis --type=constant --allow-root
-  wp config set WP_REDIS_PORT 6379 --type=constant --allow-root
 
 
   wp core install \
@@ -34,11 +32,11 @@ if [ ! -f wp-config.php ]; then
     --user_pass="$WP_USER_PASSWORD" \
     --path=/var/www/wordpress --allow-root
 
-  
-  wp plugin install redis-cache --activate --allow-root
-  wp redis enable --allow-root
-
-
 fi
+
+wp config set WP_REDIS_HOST redis --type=constant --allow-root
+wp config set WP_REDIS_PORT 6379 --type=constant --allow-root
+wp plugin install redis-cache --activate --allow-root
+wp redis enable --allow-root
 
 exec /usr/sbin/php-fpm7.4 -F
