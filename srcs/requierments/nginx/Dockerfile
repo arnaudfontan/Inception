@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN		apt update -y && \
 		apt install -y nginx openssl curl gettext-base && \

@@ -1,23 +1,23 @@
-FROM    debian:bullseye-slim
+FROM    debian:bookworm-slim
 
-RUN     apt update -y && \
-        apt upgrade -y && \
-        apt install -y \
+RUN apt update -y && \
+    apt upgrade -y && \
+    apt install -y \
         wget \
         curl \
-        php7.4 \
-        php7.4-fpm \
-        php7.4-mysql \
+        php \
+        php-fpm \
+        php-mysql \
         mariadb-client \
         unzip \
         less \
         php-redis \
-        netcat && \
-        rm -rf /var/lib/apt/lists/*
+        netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
         
 RUN     mkdir -p /run/php
 
-COPY    www.conf /etc/php/7.4/fpm/pool.d/www.conf
+COPY    www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
 RUN     wget https://fr.wordpress.org/wordpress-6.8.2-fr_FR.tar.gz -P /var/www && \
         tar -xzf /var/www/wordpress-6.8.2-fr_FR.tar.gz -C /var/www && \
@@ -36,5 +36,5 @@ WORKDIR /var/www/wordpress
 
 EXPOSE 9000
 
-CMD ["/usr/local/bin/setup.sh"]
+CMD ["/bin/bash", "-c", "/usr/local/bin/setup.sh && exec php-fpm8.2 -F"]
 

@@ -1,6 +1,6 @@
-include .env
+include srcs/.env
 
-COMPOSE_FILE = docker-compose.yml
+COMPOSE_FILE = srcs/docker-compose.yml
 COMPOSE = docker-compose -f $(COMPOSE_FILE)
 
 # Volumes
